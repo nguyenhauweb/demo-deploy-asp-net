@@ -30,7 +30,7 @@ jobs:
         run: dotnet build ./CurrentTimeService.sln --configuration Release --no-restore
 
       - name: Publish the application
-        run: dotnet publish ./CurrentTimeService/CurrentTimeService.csproj --configuration Release --output './publish'  # Sử dụng .csproj thay vì .sln
+        run: dotnet publish ./CurrentTimeService/CurrentTimeService.csproj --configuration Release --output './publish'
 
       - name: List contents of publish directory
         run: ls -la ./publish  # Kiểm tra nội dung thư mục publish
@@ -69,4 +69,4 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           slot-name: 'Production'
-          package: './publish'  # Đảm bảo đường dẫn chính xác tới thư mục publish
+          package: './.net-app'  # Đảm bảo đường dẫn chính xác tới artifact đã tải xuống
