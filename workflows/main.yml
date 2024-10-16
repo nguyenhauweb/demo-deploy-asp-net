@@ -1,39 +1,66 @@
-name: Publish 🚀
+name: Build and deploy ASP.Net Core app to Azure Web App - abcpro
 
 on:
-  workflow_dispatch:
   push:
     branches:
-    - main
+      - main
+  workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: current-time-service
-  AZURE_WEBAPP_PACKAGE_PATH: "./publish"
+  AZURE_WEBAPP_NAME: abcpro  # Tên của Azure App Service
+  AZURE_WEBAPP_PACKAGE_PATH: './myapp'  # Đường dẫn đến thư mục xuất bản
 
 jobs:
-  publish:
+  build:
     runs-on: ubuntu-latest
-    
+
     steps:
-      - uses: actions/checkout@v3
-      
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '6.0.x'
-          
-      - name: Restore
+
+      - name: Restore dependencies
         run: dotnet restore ./CurrentTimeService.sln
-        
-      - name: Build
+
+      - name: Build the application
         run: dotnet build ./CurrentTimeService.sln --configuration Release --no-restore
-        
-      - name: Publish
-        run: dotnet publish ./CurrentTimeService.sln --configuration Release --no-build --output '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}'
-        
-      - name: Deployment
-        uses: azure/webapps-deploy@v2
+
+      - name: Publish the application
+        run: dotnet publish ./CurrentTimeService/CurrentTimeService.csproj --configuration Release --output ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+      - name: List contents of publish directory
+        run: ls -la ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}  # Kiểm tra nội dung thư mục publish
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
         with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
-          package: "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}"
+          name: net-app  # Tên artifact không có dấu chấm
+          path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: 'production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+    
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: net-app  # Đảm bảo tên này khớp với tên đã tải lên
+      
+      - name: List contents of downloaded artifact
+        run: ls -la './myapp'  # Kiểm tra nội dung của thư mục tải xuống
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}  # Tên ứng dụng
+          slot-name: 'production'  # Tên slot
+          package: './myapp'  # Đảm bảo đường dẫn chính xác tới thư mục đã tải xuống
+          publish-profile: ${{ secrets.AzureAppService_PublishProfile_44174 }}  # Hồ sơ xuất bản
