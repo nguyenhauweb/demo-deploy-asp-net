@@ -38,7 +38,7 @@ jobs:
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
-          name: publish  # Tên artifact giữ nguyên là publish
+          name: publish  # Tên artifact không có dấu chấm
           path: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}'
 
   deploy:
@@ -65,7 +65,7 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_C102D2F4ADDF49E4B35276EC8F46699A }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_C102D2D4ADDF49E4B35276EC8F46699A }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_0F27DB72AF1C4DBFBCFF04E6F33F4F81 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_B312315D63694EE1BA14E8A44E4D8352 }}
 
@@ -75,4 +75,4 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           slot-name: 'Production'
-          package: './publish'  # Đường dẫn tới thư mục publish đã tải xuống
+          package: './publish'  # Đảm bảo đường dẫn chính xác tới thư mục publish
