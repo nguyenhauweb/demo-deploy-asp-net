@@ -69,4 +69,4 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           slot-name: 'Production'
-          package: "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}"
+          package: './.net-app'  # Đường dẫn đến artifact đã tải xuống
