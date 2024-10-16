@@ -38,7 +38,7 @@ jobs:
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
-          name: net-app  # Tên artifact không có dấu chấm
+          name: publish  # Tên artifact giữ nguyên là publish
           path: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}'
 
   deploy:
@@ -54,10 +54,13 @@ jobs:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
-          name: net-app  # Đảm bảo tên này khớp với tên đã tải lên
+          name: publish  # Đảm bảo tên này khớp với tên đã tải lên
 
-      - name: List contents of net-app directory
-        run: ls -la ./net-app  # Kiểm tra nội dung của thư mục đã tải xuống
+      - name: List contents of current directory
+        run: ls -la  # Kiểm tra nội dung của thư mục hiện tại
+
+      - name: List contents of publish directory
+        run: ls -la ./publish  # Kiểm tra nội dung của thư mục đã tải xuống
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -72,4 +75,4 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           slot-name: 'Production'
-          package: './net-app'  # Đảm bảo đường dẫn chính xác tới artifact đã tải xuống
+          package: './publish'  # Đường dẫn tới thư mục publish đã tải xuống
