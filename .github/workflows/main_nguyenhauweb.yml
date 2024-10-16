@@ -23,9 +23,12 @@ jobs:
         with:
           dotnet-version: '6.0.x'
 
+      - name: Restore dependencies
+        run: dotnet restore ./CurrentTimeService.sln
+
       - name: Build and Publish
         run: |
-          dotnet restore ./CurrentTimeService.sln
+          dotnet build ./CurrentTimeService.sln --configuration Release --no-restore
           dotnet publish ./CurrentTimeService/CurrentTimeService.csproj --configuration Release --output './publish'
           ls -la ./publish  # Kiểm tra nội dung thư mục publish
 
@@ -38,6 +41,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
+    permissions:
+      id-token: write  # Cần quyền viết cho id-token
 
     steps:
       - name: Download artifact
@@ -46,14 +51,14 @@ jobs:
           name: publish
 
       - name: List contents
-        run: ls -la  # Kiểm tra nội dung thư mục hiện tại
+        run: ls -la  # Kiểm tra nội dung của thư mục hiện tại
 
       - name: Login to Azure
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_C102D2F4ADDF49E4B35276EC8F46699A }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_0F27DB72AF1C4DBFBCFF04E6F33F4F81 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_B312315D63694EE1BA14E8A44E4D8352 }} 
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_B312315D63694EE1BA14E8A44E4D8352 }}
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
